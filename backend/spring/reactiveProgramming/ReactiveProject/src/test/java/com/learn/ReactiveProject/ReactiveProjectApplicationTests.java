@@ -1,8 +1,11 @@
 package com.learn.ReactiveProject;
 
+import java.time.Duration;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuple3;
@@ -40,12 +43,30 @@ class ReactiveProjectApplicationTests {
 		Mono<Tuple2<String,String>> comb2 = m1.zipWith(m2);
 
 		comb.subscribe(data -> {
-			System.out.println(data.getT1());
-			System.out.println(data.getT2());
+//			System.out.println(data.getT1());
+//			System.out.println(data.getT2());
 		});
 		
 		Mono<String> result = m1.map(String::toUpperCase);
 		result.subscribe(System.out::println);
+		
+		//flatMap : transform item emmited by mono asynchronously return new mono
+		Mono<String[]> resultFlatEx = m1.flatMap(valueM1 -> Mono.just(valueM1.split(" ")));
+		
+		
+		Flux<String> stringFlux = m1.flatMapMany(valueM1 -> Flux
+				.just(valueM1.split(" ")))
+				.log();
+		
+		stringFlux.subscribe(System.out::println);
+		
+		Flux<String> strFlux = m1
+				.concatWith(m2)
+				.log()
+				.delayElements(Duration.ofMillis(2000));
+		
+		strFlux.subscribe(System.out::println);
+		
 
 		
 	}
